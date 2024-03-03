@@ -36,6 +36,62 @@ public class ClienteDAOImplement implements ClienteDAO {
         return salida;
     }
 
+    public Cliente getClienteConMaxGer() {
+        Cliente cliente = null;
+        EntityManager entityManager = ObjectDBUtil.getEntityManagerFactory().createEntityManager();
+        try {
+            // Utiliza JPQL para obtener el cliente con el GER más alto
+            TypedQuery<Cliente> query = entityManager.createQuery("SELECT c FROM Cliente c ORDER BY c.GET DESC", Cliente.class);
+            query.setMaxResults(1); // Limita el resultado a un solo cliente
+            List<Cliente> resultado = query.getResultList();
+
+            if (!resultado.isEmpty()) {
+                cliente = resultado.get(0);
+            }
+        } finally {
+            entityManager.close();
+        }
+        return cliente;
+    }
+
+
+    public void updateCliente(Integer id, Cliente nuevoCliente) {
+        EntityManager entityManager = ObjectDBUtil.getEntityManagerFactory().createEntityManager();
+        EntityTransaction transaction = entityManager.getTransaction();
+
+        try {
+            transaction.begin();
+
+            // Obtener el cliente existente por su ID
+            Cliente clienteExistente = entityManager.find(Cliente.class, id);
+
+            // Verificar si el cliente existe antes de intentar actualizarlo
+            if (clienteExistente != null) {
+                // Actualizar los atributos del cliente existente con los valores del nuevo cliente
+                clienteExistente.setNombreCliente(nuevoCliente.getNombreCliente());
+                clienteExistente.setEdad(nuevoCliente.getEdad());
+                clienteExistente.setPeso(nuevoCliente.getPeso());
+                clienteExistente.setSexo(nuevoCliente.getSexo());
+                clienteExistente.setTalla(nuevoCliente.getTalla());
+                clienteExistente.setTipoActividad(nuevoCliente.getTipoActividad());
+                clienteExistente.setObservaciones(nuevoCliente.getObservaciones());
+                clienteExistente.setGER(nuevoCliente.getGER());
+                clienteExistente.setGET(nuevoCliente.getGET());
+
+                transaction.commit();
+            } else {
+                System.out.println("Cliente con ID " + id + " no encontrado.");
+            }
+        } catch (Exception e) {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            e.printStackTrace();
+        } finally {
+            entityManager.close();
+        }
+    }
+
     public void saveAllClientes(List<Cliente> clientes) {
 
         EntityManager em = ObjectDBUtil.getEntityManagerFactory().createEntityManager();

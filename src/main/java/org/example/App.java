@@ -56,6 +56,7 @@ public class App {
 
 // Llamar al método para guardar el nuevo cliente en la base de datos
         clienteDAO.saveCliente(nuevoCliente);
+        System.out.println(clienteDAO.getClienteConMaxGer());
 
     }
 }
